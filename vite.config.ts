@@ -12,5 +12,5 @@ export default defineConfig(({ command }) => ({
   },
   // En dev, pas de base path
   // En production (build), utiliser le nom du repo GitHub
-  base: command === 'serve' ? '/' : '/mma-course-tracker-static/',
+  base: command === 'serve' ? '/' : '/MMA_form/',
 }))
