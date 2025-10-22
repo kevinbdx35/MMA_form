@@ -2,6 +2,8 @@
 
 Application web statique pour enregistrer et suivre vos sessions d'entraînement MMA. Cette version utilise uniquement le stockage local du navigateur (localStorage) et peut être déployée sur GitHub Pages.
 
+> 🚀 **Prêt à déployer ?** Consultez le **[Guide de Déploiement](./DEPLOYMENT.md)** pour des instructions détaillées.
+
 ## Caractéristiques
 
 - ✅ Enregistrement de fiche de cours avec toutes les sections
@@ -57,6 +59,8 @@ src/
 ```
 
 ## Déploiement sur GitHub Pages
+
+📖 **[Guide complet de déploiement](./DEPLOYMENT.md)** - Instructions détaillées pas à pas
 
 ### Configuration avec GitHub Actions
 
