@@ -165,12 +165,48 @@ Une fois GitHub Pages activé dans les Settings, chaque push sur `main` déclenc
 
 ## Configuration importante
 
+### Base Path pour GitHub Pages
+
 Le fichier `vite.config.ts` contient la configuration du `base` path :
+
 ```typescript
-base: '/mma-course-tracker-static/'
+export default defineConfig(({ command }) => ({
+  // En dev, pas de base path (racine)
+  // En production, utiliser le nom du repo GitHub
+  base: command === 'serve' ? '/' : '/mma-course-tracker-static/',
+}))
 ```
 
-⚠️ **Important** : Si vous changez le nom du dépôt GitHub, vous devez aussi changer cette valeur dans `vite.config.ts`.
+⚠️ **IMPORTANT** : Le `base` path doit correspondre **EXACTEMENT** au nom de votre dépôt GitHub !
+
+#### Si votre dépôt s'appelle différemment :
+
+Par exemple, si votre dépôt est `https://github.com/USERNAME/mon-tracker-mma` :
+
+1. Modifier `vite.config.ts` :
+   ```typescript
+   base: command === 'serve' ? '/' : '/mon-tracker-mma/',
+   ```
+
+2. Rebuild et redéployer :
+   ```bash
+   npm run build
+   git add .
+   git commit -m "Update base path"
+   git push
+   ```
+
+#### Erreur 404 sur les assets
+
+Si vous voyez des erreurs 404 comme :
+```
+Failed to load resource: index-XXX.css:1 (404)
+Failed to load resource: index-XXX.js:1 (404)
+```
+
+**Cause** : Le `base` path ne correspond pas au nom du dépôt GitHub.
+
+**Solution** : Vérifier que le nom dans `vite.config.ts` correspond EXACTEMENT au nom du dépôt (sensible à la casse).
 
 ## Fonctionnalités
 

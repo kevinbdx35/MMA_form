@@ -87,21 +87,58 @@ git push
 
 ## ⚙️ Configuration du base path
 
-Si vous changez le nom du dépôt, vous devez mettre à jour le fichier `vite.config.ts` :
+### Pourquoi le base path est important ?
 
-```typescript
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-  base: '/NOUVEAU-NOM-DU-REPO/',  // ← Changer ici
-})
+Le `base` path indique à Vite où se trouvent les assets (CSS, JS) de votre application. Pour GitHub Pages, l'URL est :
+```
+https://USERNAME.github.io/NOM-DU-REPO/
 ```
 
-Ensuite, faire un commit et push pour redéployer.
+Le `base` path doit donc être `/NOM-DU-REPO/` (avec les slashes).
+
+### Configuration actuelle
+
+Le fichier `vite.config.ts` est configuré pour :
+- **Mode dev** : base path = `/` (racine, pour localhost)
+- **Mode production** : base path = `/mma-course-tracker-static/`
+
+```typescript
+export default defineConfig(({ command }) => ({
+  // En dev, pas de base path
+  // En production, utiliser le nom du repo GitHub
+  base: command === 'serve' ? '/' : '/mma-course-tracker-static/',
+}))
+```
+
+### Si vous renommez le dépôt
+
+⚠️ **IMPORTANT** : Si votre dépôt GitHub a un nom différent, vous **DEVEZ** changer le base path !
+
+Par exemple, si votre dépôt est `mon-app-mma` :
+
+1. **Modifier** `vite.config.ts` :
+   ```typescript
+   base: command === 'serve' ? '/' : '/mon-app-mma/',
+   ```
+
+2. **Rebuild et redéployer** :
+   ```bash
+   npm run build
+   git add .
+   git commit -m "Update base path to match repo name"
+   git push
+   ```
+
+3. **Vérifier** que le site fonctionne sur :
+   ```
+   https://USERNAME.github.io/mon-app-mma/
+   ```
+
+### ⚠️ Sensible à la casse
+
+Le nom dans `vite.config.ts` doit correspondre **EXACTEMENT** au nom du dépôt :
+- `Mon-App-MMA` ≠ `mon-app-mma`
+- Vérifier le nom exact sur GitHub
 
 ## 🐛 Résolution de problèmes
 
@@ -119,6 +156,36 @@ Ensuite, faire un commit et push pour redéployer.
 1. Vérifier le nom exact de votre dépôt sur GitHub
 2. Mettre à jour `base: '/NOM-DU-REPO/'` dans `vite.config.ts`
 3. Commit et push
+
+### Erreurs 404 sur les assets (CSS/JS/images)
+
+**Problème** : Console du navigateur affiche :
+```
+Failed to load resource: index-XXX.css:1 (404)
+Failed to load resource: index-XXX.js:1 (404)
+Failed to load resource: vite.svg:1 (404)
+```
+
+**Cause** : Le `base` path dans `vite.config.ts` ne correspond PAS au nom du dépôt GitHub.
+
+**Solution rapide** :
+1. Vérifier le nom **EXACT** du dépôt sur GitHub (attention à la casse !)
+2. Modifier `vite.config.ts` ligne 15 :
+   ```typescript
+   base: command === 'serve' ? '/' : '/NOM-EXACT-DU-DEPOT/',
+   ```
+3. Rebuild et push :
+   ```bash
+   npm run build
+   git add vite.config.ts dist/
+   git commit -m "Fix: Update base path to match repo name"
+   git push
+   ```
+4. Attendre 2-3 minutes → Recharger la page
+
+**Exemple** :
+- Si le dépôt est `tracker-mma` → `base: ... ? '/' : '/tracker-mma/'`
+- Si le dépôt est `MMA-Tracker` → `base: ... ? '/' : '/MMA-Tracker/'`
 
 ### Le workflow reste "en cours" pendant longtemps
 
