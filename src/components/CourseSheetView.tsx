@@ -212,16 +212,23 @@ export function CourseSheetView() {
                           />
                         </div>
                       ) : item.type === 'youtube' ? (
-                        <div className="text-sm">
-                          <span className="font-medium">🎥 Vidéo : </span>
-                          <a
-                            href={item.youtubeUrl?.replace('/embed/', '/watch?v=')}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline break-all"
-                          >
+                        <div className="text-sm space-y-1">
+                          <div>
+                            <span className="font-medium">🎥 Vidéo YouTube</span>
+                          </div>
+                          <div className="text-xs">
+                            <a
+                              href={item.youtubeUrl?.replace('/embed/', '/watch?v=')}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline break-all no-print"
+                            >
+                              Ouvrir la vidéo
+                            </a>
+                          </div>
+                          <div className="text-xs text-muted-foreground break-all font-mono">
                             {item.youtubeUrl?.replace('/embed/', '/watch?v=')}
-                          </a>
+                          </div>
                         </div>
                       ) : (
                         <video
