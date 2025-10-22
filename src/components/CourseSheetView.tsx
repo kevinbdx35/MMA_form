@@ -196,22 +196,33 @@ export function CourseSheetView() {
 
             {courseSheet.media && courseSheet.media.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold mb-1">Photos / Vidéos</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                <h4 className="text-sm font-semibold mb-1">Médias</h4>
+                <div className="space-y-2 mt-2">
                   {courseSheet.media.map((item) => (
-                    <div key={item.id} className="border border-border rounded-lg overflow-hidden">
+                    <div key={item.id}>
                       {item.type === 'image' ? (
-                        <img
-                          src={item.dataUrl}
-                          alt={item.name}
-                          className="w-full h-32 object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                          onClick={() => window.open(item.dataUrl, '_blank')}
-                          title={item.name}
-                        />
+                        <div className="border border-border rounded-lg overflow-hidden inline-block">
+                          <img
+                            src={item.dataUrl}
+                            alt={item.name}
+                            className="max-w-xs h-32 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => window.open(item.dataUrl, '_blank')}
+                            title={item.name}
+                          />
+                        </div>
+                      ) : item.type === 'youtube' ? (
+                        <a
+                          href={item.youtubeUrl?.replace('/embed/', '/watch?v=')}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline flex items-center gap-1"
+                        >
+                          🎥 {item.name || 'Vidéo YouTube'}
+                        </a>
                       ) : (
                         <video
                           src={item.dataUrl}
-                          className="w-full h-32 object-cover"
+                          className="max-w-xs h-32 object-cover rounded-lg border border-border"
                           controls
                           title={item.name}
                         />

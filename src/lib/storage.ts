@@ -1,9 +1,10 @@
 export type MediaAttachment = {
   id: string
-  type: 'image' | 'video'
+  type: 'image' | 'video' | 'youtube'
   dataUrl: string
   name: string
   size: number
+  youtubeUrl?: string
 }
 
 export type CourseSheet = {

@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
 import { Button } from './ui/button'
 import { Label } from './ui/label'
-import { ImagePlus, Video, X, Download } from 'lucide-react'
+import { Input } from './ui/input'
+import { ImagePlus, X, Download, Youtube } from 'lucide-react'
 import { type MediaAttachment } from '../lib/storage'
 import { generateId } from '../lib/storage'
+import { extractYoutubeId, getYoutubeEmbedUrl, getYoutubeThumbnail, isValidYoutubeUrl } from '../lib/youtube'
 
 type MediaUploadProps = {
   media: MediaAttachment[]
@@ -12,11 +14,12 @@ type MediaUploadProps = {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
-const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
 
 export function MediaUpload({ media, onChange }: MediaUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false)
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files
@@ -33,10 +36,9 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
 
       // Validation du type
       const isImage = ACCEPTED_IMAGE_TYPES.includes(file.type)
-      const isVideo = ACCEPTED_VIDEO_TYPES.includes(file.type)
 
-      if (!isImage && !isVideo) {
-        setError(`Le fichier ${file.name} n'est pas un format supporté`)
+      if (!isImage) {
+        setError(`Le fichier ${file.name} n'est pas un format d'image supporté`)
         return
       }
 
@@ -47,7 +49,7 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
 
         const newMedia: MediaAttachment = {
           id: generateId(),
-          type: isImage ? 'image' : 'video',
+          type: 'image',
           dataUrl: event.target.result as string,
           name: file.name,
           size: file.size,
@@ -67,6 +69,38 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+  }
+
+  function handleYoutubeAdd() {
+    if (!youtubeUrl.trim()) {
+      setError('Veuillez entrer une URL YouTube')
+      return
+    }
+
+    if (!isValidYoutubeUrl(youtubeUrl)) {
+      setError('URL YouTube invalide')
+      return
+    }
+
+    const videoId = extractYoutubeId(youtubeUrl)
+    if (!videoId) {
+      setError('Impossible d\'extraire l\'ID de la vidéo YouTube')
+      return
+    }
+
+    const newMedia: MediaAttachment = {
+      id: generateId(),
+      type: 'youtube',
+      dataUrl: getYoutubeThumbnail(videoId),
+      youtubeUrl: getYoutubeEmbedUrl(videoId),
+      name: `Vidéo YouTube`,
+      size: 0,
+    }
+
+    onChange([...media, newMedia])
+    setYoutubeUrl('')
+    setShowYoutubeInput(false)
+    setError(null)
   }
 
   function removeMedia(id: string) {
@@ -93,19 +127,19 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
       <div>
         <Label>Photos / Vidéos</Label>
         <p className="text-sm text-muted-foreground mb-2">
-          Ajoutez des photos ou vidéos de techniques (max 10 MB par fichier)
+          Ajoutez des photos ou des liens YouTube de techniques
         </p>
 
         <input
           ref={fileInputRef}
           type="file"
-          accept={[...ACCEPTED_IMAGE_TYPES, ...ACCEPTED_VIDEO_TYPES].join(',')}
+          accept={ACCEPTED_IMAGE_TYPES.join(',')}
           multiple
           onChange={handleFileSelect}
           className="hidden"
         />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             type="button"
             variant="outline"
@@ -119,12 +153,50 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => setShowYoutubeInput(!showYoutubeInput)}
           >
-            <Video className="mr-2 h-4 w-4" />
-            Ajouter une vidéo
+            <Youtube className="mr-2 h-4 w-4" />
+            Ajouter YouTube
           </Button>
         </div>
+
+        {showYoutubeInput && (
+          <div className="mt-3 space-y-2">
+            <Input
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=..."
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  handleYoutubeAdd()
+                }
+              }}
+            />
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleYoutubeAdd}
+              >
+                Ajouter
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setShowYoutubeInput(false)
+                  setYoutubeUrl('')
+                  setError(null)
+                }}
+              >
+                Annuler
+              </Button>
+            </div>
+          </div>
+        )}
 
         {error && (
           <p className="text-sm text-destructive mt-2">{error}</p>
@@ -144,6 +216,17 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
                   alt={item.name}
                   className="w-full h-40 object-cover"
                 />
+              ) : item.type === 'youtube' ? (
+                <div className="relative w-full h-40">
+                  <img
+                    src={item.dataUrl}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <Youtube className="h-12 w-12 text-white" />
+                  </div>
+                </div>
               ) : (
                 <video
                   src={item.dataUrl}
@@ -153,16 +236,18 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
               )}
 
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={() => downloadMedia(item)}
-                  title="Télécharger"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
+                {item.type !== 'youtube' && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => downloadMedia(item)}
+                    title="Télécharger"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="destructive"
@@ -178,7 +263,7 @@ export function MediaUpload({ media, onChange }: MediaUploadProps) {
               <div className="p-2 bg-background/90 backdrop-blur">
                 <p className="text-xs font-medium truncate">{item.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatFileSize(item.size)}
+                  {item.type === 'youtube' ? 'Vidéo YouTube' : formatFileSize(item.size)}
                 </p>
               </div>
             </div>
