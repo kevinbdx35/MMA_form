@@ -9,6 +9,7 @@ import {
 import { Button } from './ui/button'
 import { Label } from './ui/label'
 import { Textarea } from './ui/textarea'
+import { AutocompleteTextarea } from './AutocompleteTextarea'
 import {
   Select,
   SelectContent,
@@ -19,10 +20,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { Calendar } from './ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, FileText } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { saveCourseSheet, generateId, type CourseSheet } from '../lib/storage'
+import { saveCourseSheet, generateId, type CourseSheet, type MediaAttachment } from '../lib/storage'
+import { getTemplateNames, getTemplateLabel, getTemplate } from '../lib/templates'
+import { MediaUpload } from './MediaUpload'
 
 type CourseSheetDialogProps = {
   open: boolean
@@ -45,6 +48,19 @@ export function CourseSheetDialog({
   const [drills, setDrills] = useState(initialData?.drills || '')
   const [stretching, setStretching] = useState(initialData?.stretching || '')
   const [notes, setNotes] = useState(initialData?.notes || '')
+  const [media, setMedia] = useState<MediaAttachment[]>(initialData?.media || [])
+
+  function loadTemplate(templateKey: string) {
+    const template = getTemplate(templateKey)
+    if (!template) return
+
+    if (template.discipline) setDiscipline(template.discipline)
+    if (template.warmUp) setWarmUp(template.warmUp)
+    if (template.techniques) setTechniques(template.techniques)
+    if (template.sparring) setSparring(template.sparring)
+    if (template.drills) setDrills(template.drills)
+    if (template.stretching) setStretching(template.stretching)
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -59,6 +75,7 @@ export function CourseSheetDialog({
       drills: drills || null,
       stretching: stretching || null,
       notes: notes || null,
+      media: media.length > 0 ? media : undefined,
     }
 
     saveCourseSheet(sheet)
@@ -94,6 +111,25 @@ export function CourseSheetDialog({
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Charger un template</Label>
+            <Select onValueChange={loadTemplate}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un template (optionnel)" />
+              </SelectTrigger>
+              <SelectContent>
+                {getTemplateNames().map(key => (
+                  <SelectItem key={key} value={key}>
+                    <div className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      {getTemplateLabel(key)}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -143,10 +179,10 @@ export function CourseSheetDialog({
 
             <TabsContent value="techniques" className="space-y-2">
               <Label>Techniques travaillées</Label>
-              <Textarea
+              <AutocompleteTextarea
                 placeholder="Décrivez les techniques travaillées durant le cours..."
                 value={techniques}
-                onChange={(e) => setTechniques(e.target.value)}
+                onChange={setTechniques}
                 rows={6}
               />
             </TabsContent>
@@ -181,6 +217,8 @@ export function CourseSheetDialog({
               rows={4}
             />
           </div>
+
+          <MediaUpload media={media} onChange={setMedia} />
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>

@@ -77,7 +77,7 @@ export function CourseSheetView() {
 
   const hasContent = courseSheet?.discipline || courseSheet?.techniques || courseSheet?.warmUp ||
                      courseSheet?.drills || courseSheet?.sparring || courseSheet?.stretching ||
-                     courseSheet?.notes || courseSheet?.date
+                     courseSheet?.notes || courseSheet?.date || (courseSheet?.media && courseSheet.media.length > 0)
 
   return (
     <Card>
@@ -191,6 +191,34 @@ export function CourseSheetView() {
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                   {courseSheet.notes}
                 </p>
+              </div>
+            )}
+
+            {courseSheet.media && courseSheet.media.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold mb-1">Photos / Vidéos</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                  {courseSheet.media.map((item) => (
+                    <div key={item.id} className="border border-border rounded-lg overflow-hidden">
+                      {item.type === 'image' ? (
+                        <img
+                          src={item.dataUrl}
+                          alt={item.name}
+                          className="w-full h-32 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => window.open(item.dataUrl, '_blank')}
+                          title={item.name}
+                        />
+                      ) : (
+                        <video
+                          src={item.dataUrl}
+                          className="w-full h-32 object-cover"
+                          controls
+                          title={item.name}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

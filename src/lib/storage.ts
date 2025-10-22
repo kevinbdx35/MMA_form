@@ -1,3 +1,11 @@
+export type MediaAttachment = {
+  id: string
+  type: 'image' | 'video'
+  dataUrl: string
+  name: string
+  size: number
+}
+
 export type CourseSheet = {
   id: string
   date?: Date | null
@@ -8,6 +16,7 @@ export type CourseSheet = {
   drills?: string | null
   stretching?: string | null
   notes?: string | null
+  media?: MediaAttachment[]
 }
 
 const STORAGE_KEY = 'mma-course-sheet'
