@@ -256,3 +256,29 @@ base: '/',  // Racine pour domaine personnalisé
 ---
 
 **Besoin d'aide ?** Créez une issue sur le dépôt GitHub avec les détails de votre problème et les logs du workflow.
+
+### ⚠️ Tester le build en local
+
+**Problème** : J'ouvre `dist/index.html` directement dans mon navigateur et j'ai des erreurs 404 sur les CSS/JS.
+
+**Cause** : Vous **NE POUVEZ PAS** ouvrir le fichier directement (file:///) car le base path `/mma-course-tracker-static/` ne fonctionne pas avec ce protocole.
+
+**Solution** : Utiliser le serveur de preview de Vite :
+
+```bash
+# 1. Build de production
+npm run build
+
+# 2. Lancer le serveur de preview
+npm run preview
+```
+
+Le serveur sera accessible sur :
+```
+http://localhost:4173/mma-course-tracker-static/
+```
+
+Ce serveur simule GitHub Pages et sert correctement les fichiers avec le base path.
+
+**Note** : En mode dev (`npm run dev`), le serveur utilise `/` (racine) donc pas de problème.
+

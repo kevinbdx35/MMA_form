@@ -40,7 +40,21 @@ npm run build
 npm run preview
 ```
 
-L'application sera accessible sur `http://localhost:5173/mma-course-tracker-static/`
+L'application sera accessible sur `http://localhost:5173/`
+
+### Tester le build de production en local
+
+```bash
+# Build de production
+npm run build
+
+# Serveur de preview (simule GitHub Pages)
+npm run preview
+```
+
+Le serveur preview sera sur `http://localhost:4173/mma-course-tracker-static/`
+
+⚠️ **Important** : Ne pas ouvrir directement le fichier `dist/index.html` dans le navigateur (file:///), cela ne fonctionnera pas à cause du base path. Toujours utiliser `npm run preview` pour tester le build.
 
 ## Structure du projet
 
