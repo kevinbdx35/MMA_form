@@ -21,7 +21,8 @@ export function CourseSheetView() {
       ? new Date(courseSheet.date).toLocaleDateString('fr-FR').replace(/\//g, '-')
       : new Date().toLocaleDateString('fr-FR').replace(/\//g, '-')
 
-    document.title = `cours_${dateStr}`
+    const discipline = courseSheet?.discipline ? `_${courseSheet.discipline}` : ''
+    document.title = `cours_${dateStr}${discipline}`
     window.print()
 
     setTimeout(() => {
@@ -211,14 +212,17 @@ export function CourseSheetView() {
                           />
                         </div>
                       ) : item.type === 'youtube' ? (
-                        <a
-                          href={item.youtubeUrl?.replace('/embed/', '/watch?v=')}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline flex items-center gap-1"
-                        >
-                          🎥 {item.name || 'Vidéo YouTube'}
-                        </a>
+                        <div className="text-sm">
+                          <span className="font-medium">🎥 Vidéo : </span>
+                          <a
+                            href={item.youtubeUrl?.replace('/embed/', '/watch?v=')}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline break-all"
+                          >
+                            {item.youtubeUrl?.replace('/embed/', '/watch?v=')}
+                          </a>
+                        </div>
                       ) : (
                         <video
                           src={item.dataUrl}
